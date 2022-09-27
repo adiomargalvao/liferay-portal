@@ -1,93 +1,73 @@
 @component-name = "portal-lima"
 definition {
 
-	property portal.acceptance = "true";
-	property portal.release = "true";
-	property portal.upstream = "true";
-	property testray.main.component.name = "Blogs";
+    property portal.acceptance = "true";
+    property portal.release = "true";
+    property portal.upstream = "true";
+    property testray.main.component.name = "Blogs";
 
-	setUp {
-		TestCase.setUpPortalInstance();
+    setUp {
+        TestCase.setUpPortalInstance();
 
-		User.firstLoginPG();
+        User.firstLoginPG();
 
-		JSONLayout.addPublicLayout(
-			groupName = "Guest",
-			layoutName = "Blogs Page");
+        JSONLayout.addPublicLayout(
+            groupName = "Guest",
+            layoutName = "Blogs Page");
 
-		JSONLayout.addWidgetToPublicLayout(
-			column = "1",
-			groupName = "Guest",
-			layoutName = "Blogs Page",
-			widgetName = "Blogs");
+        JSONLayout.addWidgetToPublicLayout(
+            column = "1",
+            groupName = "Guest",
+            layoutName = "Blogs Page",
+            widgetName = "Blogs");
 
-		Navigator.gotoPage(pageName = "Blogs Page");
+        Navigator.gotoPage(pageName = "Blogs Page");
 
-		Blogs.addEntry(
-			entryContent = "Blogs Entry Content1",
-			entryTitle = "Blogs Entry Title1");
+        Blogs.addEntry(
+        entryContent = "Blogs Entry Content1",
+        entryTitle = "Blogs Entry Title1");  
 
-		BlogsEntry.viewPG(
-			entryContent = "Blogs Entry Content1",
-			entryTitle = "Blogs Entry Title1");
-	}
+    }
 
-	tearDown {
-		var testPortalInstance = PropsUtil.get("test.portal.instance");
+    tearDown {
+        var testPortalInstance = PropsUtil.get("test.portal.instance");
 
-		if ("${testPortalInstance}" == "true") {
-			PortalInstances.tearDownCP();
-		}
-		else {
-			BlogsEntry.tearDownCP();
+        if ("${testPortalInstance}" == "true") {
+            PortalInstances.tearDownCP();
+        }
+        else {
+            BlogsEntry.tearDownCP();
+            Blogs.tearDownConfigurationDisplaySettingsPG(
+                pageName = "Blogs Page",
+                portletName = "Blogs");
+            JSONLayout.deletePublicLayout(
+                groupName = "Guest",
+                layoutName = "Blogs Page");
+        }
+    }
+    test CanSearchBlogs{
+        task("Adiciona uma pagina de blog e navega ate a blogs page"){
+        Blogs.addEntry(
+        entryContent = "Blogs Entry Content2",
+        entryTitle = "Blogs Entry Title2");  
 
-			Blogs.tearDownConfigurationDisplaySettingsPG(
-				pageName = "Blogs Page",
-				portletName = "Blogs");
+        Navigator.gotoPage(pageName = "Blogs Page");
+        }
+        task("Procura pela entrada 1 e verifica o resultado encontrado"){
+        SearchPortlets.searchEmbedded(searchTerm = ""Blogs Entry Title1"");
 
-			JSONLayout.deletePublicLayout(
-				groupName = "Guest",
-				layoutName = "Blogs Page");
-		}
-	}
+        SearchResultPortlet.viewSearchResults(
+                searchAssetTitle = "Blogs Entry Title1",
+                searchAssetType = "Blogs Entry",
+                searchTerm = ""Blogs Entry Title1"");
+        }
+        task("vai para a pagina blogs page e procura pela entrada 3"){
+        Navigator.gotoPage(pageName = "Blogs Page");
 
-	test CanDeleteBlog {
-		task ("Delete blog") {
-			Blogs.addEntry(
-				entryContent = "Blogs Entry Content2",
-				entryTitle = "Blogs Entry Title2");
-
-			BlogsEntry.moveToRecycleBinPG(
-				entryContent = "Blogs Entry Content2",
-				entryTitle = "Blogs Entry Title2");
-
-			BlogsEntry.viewNoPG(entryTitle = "Blogs Entry Title2");
-		}
-	}
-
-	@description = "This test covers LPS-106613. It ensures that the custom abstract field cannot be reset to empty after typing in the content field."
-	@priority = "3"
-	@refactordone
-	test CanEditBlog {
-		task ("Edit entry") {
-			Blogs.editEntryPG(
-				entryContent = "Blogs Entry Content",
-				entryContentEdit = "Blogs Entry Content Edit",
-				entryTitle = "Blogs Entry Title",
-				entryTitleEdit = "Blogs Entry Title Edit");
-		}
-	}
-
-	test CanSearchBlogs {
-		task ("Search Blog") {
-			Blogs.addEntry(
-				entryContent = "Blogs Entry Content2",
-				entryTitle = "Blogs Entry Title2");
-
-			SearchPortlets.searchEmbedded(searchTerm = "&quot;Blogs Entry Title1&quot;");
-
-			BlogsEntry.viewNoPG(entryTitle = "Blogs Entry Title1");
-		}
-	}
-
+        SearchPortlets.searchEmbedded(searchTerm = ""Blogs Entry Title3"");
+        }
+        task("verifica resultado que nao exite"){
+        SearchResultPortlet.viewNoSearchResults(searchTerm = ""Blogs Entry Title3"");
+        }
+    }
 }
