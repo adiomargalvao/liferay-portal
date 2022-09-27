@@ -7,25 +7,31 @@ definition {
 	property testray.main.component.name = "Blogs";
 
 	setUp {
-		TestCase.setUpPortalInstance();
+		task ("Faz login no site") {
+			TestCase.setUpPortalInstance();
 
-		User.firstLoginPG();
+			User.firstLoginPG();
+		}
 
-		JSONLayout.addPublicLayout(
-			groupName = "Guest",
-			layoutName = "Blogs Page");
+		task (" adiciona um layout de blog ao site") {
+			JSONLayout.addPublicLayout(
+				groupName = "Guest",
+				layoutName = "Blogs Page");
 
-		JSONLayout.addWidgetToPublicLayout(
-			column = "1",
-			groupName = "Guest",
-			layoutName = "Blogs Page",
-			widgetName = "Blogs");
+			JSONLayout.addWidgetToPublicLayout(
+				column = "1",
+				groupName = "Guest",
+				layoutName = "Blogs Page",
+				widgetName = "Blogs");
+		}
 
-		Navigator.gotoPage(pageName = "Blogs Page");
+		task ("Vai para a pagina de blogs e adiciona uma entrada de blog") {
+			Navigator.gotoPage(pageName = "Blogs Page");
 
-		Blogs.addEntry(
-			entryContent = "Blogs Entry Content1",
-			entryTitle = "Blogs Entry Title1");
+			Blogs.addEntry(
+				entryContent = "Blogs Entry Content1",
+				entryTitle = "Blogs Entry Title1");
+		}
 	}
 
 	tearDown {
