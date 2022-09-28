@@ -71,13 +71,17 @@ definition {
 				searchTerm = "&quot;Blogs Entry Title1&quot;");
 		}
 
+		task ("verifica que o resultado 2 nao e encontrado") {
+			BlogsEntry.viewNoCP(entryTitle = "&quot;Blogs Entry Title2&quot;");
+		}
+
 		task ("vai para a pagina blogs page e procura pela entrada 3") {
 			Navigator.gotoPage(pageName = "Blogs Page");
 
 			SearchPortlets.searchEmbedded(searchTerm = "&quot;Blogs Entry Title3&quot;");
 		}
 
-		task ("verifica resultado que nao exite") {
+		task ("verifica resultado que nao existe") {
 			SearchResultPortlet.viewNoSearchResults(searchTerm = "&quot;Blogs Entry Title3&quot;");
 		}
 	}
