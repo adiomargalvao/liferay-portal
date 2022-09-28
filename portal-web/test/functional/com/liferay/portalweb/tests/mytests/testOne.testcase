@@ -1,66 +1,73 @@
 @component-name = "portal-lima"
 definition {
 
-	property portal.acceptance = "true";
-	property portal.release = "true";
-	property portal.upstream = "true";
-	property testray.main.component.name = "Blogs";
+    property portal.acceptance = "true";
+    property portal.release = "true";
+    property portal.upstream = "true";
+    property testray.main.component.name = "Blogs";
 
-	var pageName = "Blogs Page";
+    var pageName = "Blogs Page";
 
-	setUp {
-		task ("criar instancia do portal e logar") {
-			TestCase.setUpPortalInstance();
+    setUp {
+        task("criar instancia do portal e logar"){
+        TestCase.setUpPortalInstance();
 
-			User.firstLoginPG();
-		}
+        User.firstLoginPG();
+        }
+        task("criar pagina do blog e adicionar widget"){
+        JSONLayout.addPublicLayout(
+            groupName = "Guest",
+            layoutName = "Blogs Page");
 
-		task ("criar pagina do blog e adicionar widget") {
-			JSONLayout.addPublicLayout(
-				groupName = "Guest",
-				layoutName = "Blogs Page");
+        JSONLayout.addWidgetToPublicLayout(
+            column = "1",
+            groupName = "Guest",
+            layoutName = "Blogs Page",
+            widgetName = "Blogs");
+        }
+        task("navegar ate o blog"){
+        Navigator.gotoPage(pageName = "Blogs Page");
+ 
+        }
+    }
 
-			JSONLayout.addWidgetToPublicLayout(
-				column = "1",
-				groupName = "Guest",
-				layoutName = "Blogs Page",
-				widgetName = "Blogs");
-		}
+    tearDown {
+        var testPortalInstance = PropsUtil.get("test.portal.instance");
 
-		task ("navegar ate o blog e adicionar conteudo e titulo") {
-			Navigator.gotoPage(pageName = "Blogs Page");
+        if ("${testPortalInstance}" == "true") {
+            PortalInstances.tearDownCP();
+        }
+        else {
+            BlogsEntry.tearDownCP();
+            Blogs.tearDownConfigurationDisplaySettingsPG(
+                pageName = "Blogs Page",
+                portletName = "Blogs");
+            JSONLayout.deletePublicLayout(
+                groupName = "Guest",
+                layoutName = "Blogs Page");
+        }
+    }
 
-			Blogs.addEntry(
-				entryContent = "Blogs Entry Content",
-				entryTitle = "Blogs Entry Title");
-		}
+    test CanCreateBlog{
+
+    task("Adiciona uma entrada de blog"){
+	Blogs.addEntry(
+                entryContent = "Blog Entry Content",
+                entrySubtitle = "Test Blog",
+                entryTitle = "Blog Entry Title");
 	}
+	task("visualiza mensagem de sucesso e navega ate a blogs page"){
+    Alert.viewSuccessMessage();
 
-	tearDown {
-		var testPortalInstance = PropsUtil.get("test.portal.instance");
+	Navigator.openURL();
 
-		if ("${testPortalInstance}" == "true") {
-			PortalInstances.tearDownCP();
-		}
-		else {
-			BlogsEntry.tearDownCP();
-
-			Blogs.tearDownConfigurationDisplaySettingsPG(
-				pageName = "Blogs Page",
-				portletName = "Blogs");
-
-			JSONLayout.deletePublicLayout(
-				groupName = "Guest",
-				layoutName = "Blogs Page");
-		}
+	Navigator.gotoPage(pageName = "Blogs Page");
 	}
-
-	test CanCreateBlog {
-		task ("verificar o conteudo e titulo do blog") {
-			BlogsEntry.viewPG(
-				entryContent = "Blogs Entry Content",
-				entryTitle = "Blogs Entry Title");
-		}
+	task("Verifica se a entrada de blog esta la"){
+    BlogsEntry.viewPG(
+            entryContent = "Blog Entry Content",
+            entryTitle = "Blog Entry Title");
 	}
-
+   	 	
+	}
 }
